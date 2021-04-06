@@ -44,3 +44,36 @@
 
 
   ```
+
+## 存在的问题
+
+  **如果用户操作非常频繁，不等延迟时间结束就进行下次操作，会频繁的清除计时器并重新生成，所以函数 `fn` 一直都没有办法执行，导致用户操作迟迟得不到响应**
+
+  **应该在 `wait` 时间内，可以重新生成定时器，但时间到了必须给用户一个响应**
+
+  ```js
+    const debounce = (fn, wait) => {
+      let prev = 0
+      let timer = null
+      return function (...args) {
+        let now = +new Date()
+        if (now - prev > wait) {
+          // 第一次执行
+          // 或者超出等待的 wait 时间之后执行
+          prev = now
+          fn.apply(this, args)
+        } else {
+          // 如果定时器存在，清除上一次的
+          if (timer) clearTimeout(timer)
+          // 设置一个新的定时器
+          timer = setTimeout(() => {
+            prev = now
+            fn.apply(this, args)
+          }, wait)
+        }
+      }
+    }
+
+
+
+  ```
