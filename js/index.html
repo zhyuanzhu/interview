@@ -18,22 +18,25 @@
   <div id="dv"></div>
   <script>
 
-    const throttle = (fn, wait) => {
+function debounce (fn, wait, immediate) {
       let timer = null
       return function (...args) {
-        if (timer) return
+        // 如果定时器已经设置了，清除上一次的定时器
+        if (timer) clearTimeout(timer)
+
+        if (immediate && !timer) {
+          fn.apply(this, args)
+        }
+
+        // 设置新的定时器，wait 后执行函数 fn
         timer = setTimeout(() => {
           fn.apply(this, args)
-          timer = null
         }, wait)
       }
     }
 
-    // 每 1000 毫秒执行一次
-    const mouseMoveFn = throttle(() => console.log('mouse move'), 1000)
-
-    const dom = document.querySelector('#dv')
-    // dom.addEventListener('mousemove', mouseMoveFn)
+    // 1000 毫秒后执行
+    const mouseMoveFn = debounce(() => console.log('mouse move'), 1000, true)
     document.documentElement.addEventListener('mousemove', mouseMoveFn)
 
 

@@ -18,7 +18,7 @@
      * @param { Boolean } immediate 是否立即执行 
      * @return { Function }
      */
-    const throttle = (fn, wait) => {
+    function throttle (fn, wait) {
       // 上一次执行时间
       let prev = 0
       return function (...args) {
@@ -40,7 +40,7 @@
 
   - 使用定时器
   ```js
-    const throttle = (fn, wait) => {
+    function throttle (fn, wait) {
       let timer = null
       return function (...args) {
         if (timer) return
