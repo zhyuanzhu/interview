@@ -6,3 +6,5 @@
 - [防抖](./js/debounce.md)
 
 - [new运算符](./js/new.md)
+
+- [bind方法](./js/bind.md)

@@ -18,32 +18,48 @@
   <div id="dv"></div>
   <script>
 
-    function createNew (Ctor, ...args) {
-      const isFn = Object.prototype.toString(Ctor) === '[Object Function]'
-      if (!isFn) {
-        throw new Error(`expect Ctor is a function, but get others`)
+    Function.prototype.bindFn = function (thisArg, ...args) {
+        if (typeof this !== 'function') {
+          throw new Error(`${this} must be a function`)
+        }
+
+        const _self = this
+        return function () {
+          console.log(arguments)
+          _self.apply(thisArg, [...args, ...arguments])
+
+        }
+
       }
-        // let obj = {}
-        // Object.setPrototype(obj, Ctor.prototype)
-        // let result = Ctor.apply(obj, args)
-        // return result instanceof Object ? result : obj
-        let obj = Object.create(Ctor.prototype)
-        let ret = Ctor.apply(obj, args)
-        return ret instanceof Object ? ret : obj
+      const obj = {
+        name: 'james',
+        getName: function () {
+          console.log(`名字是：${this.name}`)
+        }
+      }
+      var name = 'ak'
+      function getName () {
+        console.log(this.name)
       }
 
-      // function Test (name, age) {
-      //   this.name = name
-      //   this.age = age
-      //   this.sayHello = function () {
-      //     console.log(`${this.name}说：hello ${this.age}`)
-      //   }
-      // }
+      function Tes (name) {
+        this.name = name
+        this.getName = function () {
+          console.log(this.name)
+        }
+      }
 
-      let Test = 'a'
+      const tes = new Tes('zhang')
+      tes.getName()
 
-      const test = createNew(Test, 'James', 18)
-      test.sayHello()
+      getName()
+
+      const test= getName.bindFn(obj, 1111, 22232)
+      test('11111')
+
+      // const test2 = new (Tes.bindFn(obj, '哈哈哈哈'))
+      // console.log(test2.getName())
+      
 
 
 
