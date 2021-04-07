@@ -16,7 +16,7 @@
 - 实现一个 `new` 运算符
 ```js
   function createNew (Ctor, ...args) {
-    const isFn = Object.prototype.toString(Ctor) === '[Object Function]'
+    const isFn = Object.prototype.toString.call(Ctor) === '[Object Function]'
     if (!isFn) {
       throw new Error(`expect Ctor is a function, but get others`)
     }

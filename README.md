@@ -8,3 +8,5 @@
 - [new运算符](./js/new.md)
 
 - [bind方法](./js/bind.md)
+
+- [call方法](./js/call.md)

@@ -18,48 +18,28 @@
   <div id="dv"></div>
   <script>
 
-    Function.prototype.bindFn = function (thisArg, ...args) {
-        if (typeof this !== 'function') {
-          throw new Error(`${this} must be a function`)
-        }
-
-        const _self = this
-        return function () {
-          console.log(arguments)
-          _self.apply(thisArg, [...args, ...arguments])
-
-        }
-
-      }
-      const obj = {
-        name: 'james',
-        getName: function () {
-          console.log(`名字是：${this.name}`)
-        }
-      }
-      var name = 'ak'
-      function getName () {
-        console.log(this.name)
-      }
-
-      function Tes (name) {
-        this.name = name
-        this.getName = function () {
-          console.log(this.name)
-        }
-      }
-
-      const tes = new Tes('zhang')
-      tes.getName()
-
-      getName()
-
-      const test= getName.bindFn(obj, 1111, 22232)
-      test('11111')
-
-      // const test2 = new (Tes.bindFn(obj, '哈哈哈哈'))
-      // console.log(test2.getName())
+    Function.prototype._call = function (thisArg, ...args) {
+      // 判断第一个参数是否传入
+      // Object(thisArg) 是为了处理传入的第一个参数是 基础数据类型
+      thisArg = thisArg ? Object(thisArg) : window
       
+      // 给 thisArg 创建一个新的 fn 方法，该方法指向 调用 call 的函数
+      thisArg.fn = this
+      let result = thisArg.fn(...args)
+      delete thisArg.fn
+      return result
+    }
+
+    var name = 'window'
+    const obj = { 
+      name: 'James'
+    }
+    function sayName (...args) {
+      console.log(`args: `, ...args)
+      console.log(this.name)
+    }
+
+    sayName._call(obj, 1, 2, 3)
 
 
 
