@@ -10,3 +10,5 @@
 - [bind方法](./js/bind.md)
 
 - [call方法](./js/call.md)
+
+- [apply方法](./js/apply.md)

@@ -4,6 +4,8 @@
 
   > `bind` 方法创建一个新的函数，这个新函数的 `this` 指向 `bind` 方法的第一个参数，而其余参数将作为新函数的参数，供调用时使用
 
+  - 返回一个新的函数
+
 - 实现一个 `bind` 函数
 ```js
   Function.prototype.bindFn = function (thisArg, ...args) {
