@@ -18,29 +18,33 @@
   <div id="dv"></div>
   <script>
 
-    Function.prototype._call = function (thisArg, ...args) {
-      // 判断第一个参数是否传入
-      // Object(thisArg) 是为了处理传入的第一个参数是 基础数据类型
-      thisArg = thisArg ? Object(thisArg) : window
-      
-      // 给 thisArg 创建一个新的 fn 方法，该方法指向 调用 call 的函数
-      thisArg.fn = this
-      let result = thisArg.fn(...args)
-      delete thisArg.fn
-      return result
+    function curry (func) {
+
+      return function curriedFn (...args) {
+        // 传入的实参小于 func 函数的形参个数
+        if (args.length < func.length) {
+          // 递归调用 curriedFn，合并参数
+          return function () {
+            // 合并处理参数
+            return curriedFn(...args.concat(Array.from(arguments)))
+          }
+        }
+
+        // 传入的实参个数等于 func 的形参个数
+        return func(...args)
+      }
+
     }
 
-    var name = 'window'
-    const obj = { 
-      name: 'James'
-    }
-    function sayName (...args) {
-      console.log(`args: `, ...args)
-      console.log(this.name)
+    function getSum (a, b, c) {
+      return a + b + c
     }
 
-    sayName._call(obj, 1, 2, 3)
-
+    const curryFn = curry(getSum)
+    console.log(curryFn(1)(2, 3))
+    console.log(curryFn(1, 2)(3))
+    console.log(curryFn(1, 2, 3))
+    console.log(getSum(1, 2, 3))
 
 
   </script>

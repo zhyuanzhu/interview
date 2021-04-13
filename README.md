@@ -12,3 +12,5 @@
 - [call方法](./js/call.md)
 
 - [apply方法](./js/apply.md)
+
+- [函数柯里化](./js/curry.md)
