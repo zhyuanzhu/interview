@@ -54,7 +54,7 @@ class MyPromise {
     this.reason = reason
     // 异步调用 reject 
     // this.failCallback && this.failCallback(reason)
-    while(this.failCallback) {
+    while(this.failCallback.length) {
       const firstFailCb = this.failCallback.shift()
       firstFailCb(this.reason)
     }
@@ -62,15 +62,18 @@ class MyPromise {
 
   then (successCallback, failCallback) {
 
-    let _promise = MyPromise((resolve, reject) => {
+    let _promise = new MyPromise((resolve, reject) => {
       // 判断状态，根据状态调用对应的回掉函数
       if (this.status === FULFILLED) {
-        let succ = successCallback(this.value)
-        // 查看 succ 是普通值还是 promise 对象
-        // 如果是 普通值，直接调用 resolve 传递下去
-        // 如果是 promise，查看 promise 对象的返回结果
-        // 根据上述的返回结果，决定调用 resolve 还是 reject
-        resolvePromise(succ, resolve, reject)
+        // 使用异步函数是为了在函数内部获取到 _promise
+        setTimeout(() => {
+          let succ = successCallback(this.value)
+          // 查看 succ 是普通值还是 promise 对象
+          // 如果是 普通值，直接调用 resolve 传递下去
+          // 如果是 promise，查看 promise 对象的返回结果
+          // 根据上述的返回结果，决定调用 resolve 还是 reject
+          resolvePromise(_promise, succ, resolve, reject)
+        } ,0)
       } else if (this.status === REJECTED) {
         failCallback(this.reason)
       } else {
@@ -84,7 +87,11 @@ class MyPromise {
   }
 }
 
-function resolvePromise (data, resolve, reject) {
+function resolvePromise (promise, data, resolve, reject) {
+  if (promise === data) {
+    const typeError = new TypeError('Chaining cycle detected for promise #<Promise>')
+    return reject(typeError)
+  }
   if (data instanceof MyPromise) {
     // promise 对象
     // data.then(value => resolve(value), err => reject(err))
@@ -96,13 +103,18 @@ function resolvePromise (data, resolve, reject) {
 
 
 let promise = new MyPromise((resolve, reject) => {
-  setTimeout(() => {
+  // setTimeout(() => {
     resolve(1)
-  }, 2000)
+  // }, 2000)
 })
 
-promise.then((value) => {
+let p1 = promise.then((value) => {
   console.log(value)
-}, (err) => {
-  console.log(err)
+  return p1
+})
+
+p1.then(v => {
+  console.log(v)
+}, err => {
+  console.log(err.message)
 })
