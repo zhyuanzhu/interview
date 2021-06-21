@@ -14,7 +14,12 @@ const REJECTED = 'rejected'
 class MyPromise {
 
   constructor (executor) {
-    executor(this.resolve, this.reject);
+    // 执行器执行异常捕获
+    try {
+      executor(this.resolve, this.reject);
+    } catch (error) {
+      this.reject(error)
+    }
   }
 
   // promise 状态
@@ -39,8 +44,9 @@ class MyPromise {
     // 判断是否是异步，即成功回调函是否存在
     // this.successCallback && this.successCallback(value)
     while(this.successCallback.length) {
+      // console.log(firstSuccessCb)
       const firstSuccessCb = this.successCallback.shift();
-      firstSuccessCb(this.value)
+      firstSuccessCb()
     }
   }
 
@@ -54,9 +60,10 @@ class MyPromise {
     this.reason = reason
     // 异步调用 reject 
     // this.failCallback && this.failCallback(reason)
+    // console.log
     while(this.failCallback.length) {
       const firstFailCb = this.failCallback.shift()
-      firstFailCb(this.reason)
+      firstFailCb()
     }
   }
 
@@ -67,19 +74,54 @@ class MyPromise {
       if (this.status === FULFILLED) {
         // 使用异步函数是为了在函数内部获取到 _promise
         setTimeout(() => {
-          let succ = successCallback(this.value)
-          // 查看 succ 是普通值还是 promise 对象
-          // 如果是 普通值，直接调用 resolve 传递下去
-          // 如果是 promise，查看 promise 对象的返回结果
-          // 根据上述的返回结果，决定调用 resolve 还是 reject
-          resolvePromise(_promise, succ, resolve, reject)
+          // success 回调函数错误捕获
+          try {
+            let succ = successCallback(this.value)
+            // 查看 succ 是普通值还是 promise 对象
+            // 如果是 普通值，直接调用 resolve 传递下去
+            // 如果是 promise，查看 promise 对象的返回结果
+            // 根据上述的返回结果，决定调用 resolve 还是 reject
+            resolvePromise(_promise, succ, resolve, reject)
+          } catch (error) {
+            reject(error)
+          }
         } ,0)
       } else if (this.status === REJECTED) {
-        failCallback(this.reason)
+        setTimeout(() => {
+          // error 回调函数错误捕获
+          try {
+            let err = failCallback(this.reason)
+            resolvePromise(_promise, err, resolve, reject)
+          } catch (error) {
+            reject(error)
+          }
+        } ,0)
       } else {
         // pending 状态
-        this.successCallback.push(successCallback)
-        this.failCallback.push(failCallback)
+        // this.successCallback.push(successCallback)
+        // this.failCallback.push(failCallback)
+        this.successCallback.push(() => {
+          setTimeout(() => {
+            // success 回调函数错误捕获
+            try {
+              let succ = successCallback(this.value)
+              resolvePromise(_promise, succ, resolve, reject)
+            } catch (error) {
+              reject(error)
+            }
+          } ,0)
+        })
+        this.failCallback.push(() => {
+          setTimeout(() => {
+            // success 回调函数错误捕获
+            try {
+              let error = successCallback(this.reason)
+              resolvePromise(_promise, error, resolve, reject)
+            } catch (error) {
+              reject(error)
+            }
+          } ,0)
+        })
       }
     })
 
@@ -104,17 +146,24 @@ function resolvePromise (promise, data, resolve, reject) {
 
 let promise = new MyPromise((resolve, reject) => {
   // setTimeout(() => {
-    resolve(1)
+    throw new Error(`executor error`)
+    // resolve(1)
+    // reject('error')
   // }, 2000)
 })
 
 let p1 = promise.then((value) => {
   console.log(value)
-  return p1
+  throw new Error('then error')
+  return 2
+}, err => {
+  console.log(err)
+  // throw new Error('11then error')
+  return 3
 })
 
-p1.then(v => {
-  console.log(v)
-}, err => {
-  console.log(err.message)
+p1.then(val => {
+  console.log(`链式2`, val)
+}, (err2) => {
+  console.log(`err2`, err2)
 })
