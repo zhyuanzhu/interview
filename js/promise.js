@@ -61,16 +61,36 @@ class MyPromise {
   }
 
   then (successCallback, failCallback) {
-    // 判断状态，根据状态调用对应的回掉函数
-    if (this.status === FULFILLED) {
-      successCallback(this.value)
-    } else if (this.status === REJECTED) {
-      failCallback(this.reason)
-    } else {
-      // pending 状态
-      this.successCallback.push(successCallback)
-      this.failCallback.push(failCallback)
-    }
+
+    let _promise = MyPromise((resolve, reject) => {
+      // 判断状态，根据状态调用对应的回掉函数
+      if (this.status === FULFILLED) {
+        let succ = successCallback(this.value)
+        // 查看 succ 是普通值还是 promise 对象
+        // 如果是 普通值，直接调用 resolve 传递下去
+        // 如果是 promise，查看 promise 对象的返回结果
+        // 根据上述的返回结果，决定调用 resolve 还是 reject
+        resolvePromise(succ, resolve, reject)
+      } else if (this.status === REJECTED) {
+        failCallback(this.reason)
+      } else {
+        // pending 状态
+        this.successCallback.push(successCallback)
+        this.failCallback.push(failCallback)
+      }
+    })
+
+    return _promise
+  }
+}
+
+function resolvePromise (data, resolve, reject) {
+  if (data instanceof MyPromise) {
+    // promise 对象
+    // data.then(value => resolve(value), err => reject(err))
+    data.then(resolve, reject)
+  } else {
+    resolve(data)
   }
 }
 
