@@ -23,10 +23,10 @@ class MyPromise {
   value = undefined
   // 失败的原因
   reason = undefined
-  // 成功回调函数，处理异步 resolve 方法
-  successCallback = undefined
-  // 失败回调函数，处理异步 reject 方法
-  failCallback = undefined
+  // 成功回调函数，处理异步 resolve 方法    成功回调函数队列 
+  successCallback = []
+  // 失败回调函数，处理异步 reject 方法 
+  failCallback = []
 
   // 将状态更改为成功
   resolve = (value) => {
@@ -37,7 +37,11 @@ class MyPromise {
     // 保存成功之后的值
     this.value = value
     // 判断是否是异步，即成功回调函是否存在
-    this.successCallback && this.successCallback(value)
+    // this.successCallback && this.successCallback(value)
+    while(this.successCallback.length) {
+      const firstSuccessCb = this.successCallback.shift();
+      firstSuccessCb(this.value)
+    }
   }
 
   // 将状态更改为失败
@@ -49,7 +53,11 @@ class MyPromise {
     // 保存失败的原因
     this.reason = reason
     // 异步调用 reject 
-    this.failCallback && this.failCallback(reason)
+    // this.failCallback && this.failCallback(reason)
+    while(this.failCallback) {
+      const firstFailCb = this.failCallback.shift()
+      firstFailCb(this.reason)
+    }
   }
 
   then (successCallback, failCallback) {
@@ -60,8 +68,8 @@ class MyPromise {
       failCallback(this.reason)
     } else {
       // pending 状态
-      this.successCallback = successCallback
-      this.failCallback = failCallback
+      this.successCallback.push(successCallback)
+      this.failCallback.push(failCallback)
     }
   }
 }
