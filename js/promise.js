@@ -8,6 +8,11 @@ const PENDING = 'pending'
 const FULFILLED = 'fulfilled'
 const REJECTED = 'rejected'
 
+const DEFAULT_SUCCESS_CALLBACK = value => value;
+const DEFAULT_FAIL_CALLBACK = reason => {
+  throw reason
+}
+
 /**
  * @param { Function } executor
  */
@@ -67,8 +72,7 @@ class MyPromise {
     }
   }
 
-  then (successCallback, failCallback) {
-
+  then (successCallback=DEFAULT_SUCCESS_CALLBACK, failCallback=DEFAULT_FAIL_CALLBACK) {
     let _promise = new MyPromise((resolve, reject) => {
       // 判断状态，根据状态调用对应的回掉函数
       if (this.status === FULFILLED) {
@@ -146,24 +150,27 @@ function resolvePromise (promise, data, resolve, reject) {
 
 let promise = new MyPromise((resolve, reject) => {
   // setTimeout(() => {
-    throw new Error(`executor error`)
-    // resolve(1)
+    // throw new Error(`executor error`)
+    resolve(1)
     // reject('error')
   // }, 2000)
 })
-
-let p1 = promise.then((value) => {
-  console.log(value)
-  throw new Error('then error')
-  return 2
-}, err => {
-  console.log(err)
-  // throw new Error('11then error')
-  return 3
+promise.then().then().then(v => {
+  console.log(v)
 })
 
-p1.then(val => {
-  console.log(`链式2`, val)
-}, (err2) => {
-  console.log(`err2`, err2)
-})
+// let p1 = promise.then((value) => {
+//   console.log(value)
+//   throw new Error('then error')
+//   return 2
+// }, err => {
+//   console.log(err)
+//   // throw new Error('11then error')
+//   return 3
+// })
+
+// p1.then(val => {
+//   console.log(`链式2`, val)
+// }, (err2) => {
+//   console.log(`err2`, err2)
+// })
