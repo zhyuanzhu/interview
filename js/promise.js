@@ -134,10 +134,8 @@ class MyPromise {
 
   finally (callback) {
     return this.then((value) => {
-      return MyPromise.resolve(callback()).then((v) => {
-        if (!callback()) return value
-        return v
-      })    // 为了处理 callback 中是异步调用的 promise
+      let ret = callback()
+      return MyPromise.resolve(ret).then((v) => ret ? v : value)    // 为了处理 callback 中是异步调用的 promise
       // callback()
       // return value
     }, err => {
@@ -147,6 +145,10 @@ class MyPromise {
         throw err
       }) 
     })
+  }
+
+  catch (failCallback) {
+    return this.then(undefined, failCallback)
   }
 
   static all (array) {
@@ -278,12 +280,12 @@ function px () {
   })
 }
 
-px().finally(() => {
-  let x = p0()
-  console.log('x', x)
-  // return x
-})
-.then(val => {
-  console.log('finall then')
-  console.log(val)
+Promise.reject('ffff').then(() => {
+
+}, (er) => {
+  console.log(er)
+}).then(() => {
+  throw Error(11111)
+}).catch(v => {
+  console.log(v)
 })
