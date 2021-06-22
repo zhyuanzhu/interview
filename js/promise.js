@@ -158,6 +158,20 @@ class MyPromise {
     })
   }
 
+  static resolve (data) {
+    if (data instanceof MyPromise) {
+      return data
+    }
+    return new MyPromise(resolve => resolve(data))
+  }
+
+  static reject (reason) {
+    if (reason instanceof MyPromise) {
+      return reason
+    }
+    return new MyPromise((_, rejcet) => rejcet(reason))
+  }
+
 
 }
 
@@ -192,7 +206,12 @@ let p1 = new MyPromise((resolve, reject) => {
 // promise.then().then().then(v => {
 //   console.log(v)
 // })
-MyPromise.all([2, 3, 'a', promise, p1]).then(val => {
+
+let p2 = MyPromise.resolve(100)
+
+let p3 = MyPromise.reject('reject')
+
+MyPromise.all([p3, p2, 2, 3, 'a', promise]).then(val => {
   console.log(val)
 })
 
