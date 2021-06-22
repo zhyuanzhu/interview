@@ -79,27 +79,31 @@ class MyPromise {
         // 使用异步函数是为了在函数内部获取到 _promise
         setTimeout(() => {
           // success 回调函数错误捕获
-          try {
-            let succ = successCallback(this.value)
-            // 查看 succ 是普通值还是 promise 对象
-            // 如果是 普通值，直接调用 resolve 传递下去
-            // 如果是 promise，查看 promise 对象的返回结果
-            // 根据上述的返回结果，决定调用 resolve 还是 reject
-            resolvePromise(_promise, succ, resolve, reject)
-          } catch (error) {
-            reject(error)
-          }
+          // try {
+          //   let succ = successCallback(this.value)
+          //   // 查看 succ 是普通值还是 promise 对象
+          //   // 如果是 普通值，直接调用 resolve 传递下去
+          //   // 如果是 promise，查看 promise 对象的返回结果
+          //   // 根据上述的返回结果，决定调用 resolve 还是 reject
+          //   resolvePromise(_promise, succ, resolve, reject)
+          // } catch (error) {
+          //   reject(error)
+          // }
+          asyncFn(this.value, _promise, successCallback, resolve, reject)
         } ,0)
+        
       } else if (this.status === REJECTED) {
         setTimeout(() => {
           // error 回调函数错误捕获
-          try {
-            let err = failCallback(this.reason)
-            resolvePromise(_promise, err, resolve, reject)
-          } catch (error) {
-            reject(error)
-          }
+          // try {
+          //   let err = failCallback(this.reason)
+          //   resolvePromise(_promise, err, resolve, reject)
+          // } catch (error) {
+          //   reject(error)
+          // }
+          asyncFn(this.reason, _promise, failCallback, resolve, reject)
         } ,0)
+        
       } else {
         // pending 状态
         // this.successCallback.push(successCallback)
@@ -107,24 +111,28 @@ class MyPromise {
         this.successCallback.push(() => {
           setTimeout(() => {
             // success 回调函数错误捕获
-            try {
-              let succ = successCallback(this.value)
-              resolvePromise(_promise, succ, resolve, reject)
-            } catch (error) {
-              reject(error)
-            }
+            // try {
+            //   let succ = successCallback(this.value)
+            //   resolvePromise(_promise, succ, resolve, reject)
+            // } catch (error) {
+            //   reject(error)
+            // }
+            asyncFn(this.value, _promise, successCallback, resolve, reject)
           } ,0)
+          
         })
         this.failCallback.push(() => {
           setTimeout(() => {
             // success 回调函数错误捕获
-            try {
-              let error = successCallback(this.reason)
-              resolvePromise(_promise, error, resolve, reject)
-            } catch (error) {
-              reject(error)
-            }
+            // try {
+            //   let error = failCallback(this.reason)
+            //   resolvePromise(_promise, error, resolve, reject)
+            // } catch (error) {
+            //   reject(error)
+            // }
+            asyncFn(this.reason, _promise, failCallback, resolve, reject)
           } ,0)
+          
         })
       }
     })
@@ -188,8 +196,15 @@ class MyPromise {
     }
     return new MyPromise((_, rejcet) => rejcet(reason))
   }
+}
 
-
+function asyncFn (v, promise, cb, resolve, reject) {
+  try {
+    let x = cb(v)
+    resolvePromise(promise, x, resolve, reject)
+  } catch (error) {
+    reject(error)
+  }
 }
 
 function resolvePromise (promise, data, resolve, reject) {
@@ -221,9 +236,9 @@ let promise = new MyPromise((resolve, reject) => {
 let p1 = new MyPromise((resolve, reject) => {
   reject('fail')
 })
-// promise.then().then().then(v => {
-//   console.log(v)
-// })
+promise.then().then().then(v => {
+  console.log(v)
+})
 
 function p0 () {
   return new MyPromise((resolve) => {
