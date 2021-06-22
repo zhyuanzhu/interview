@@ -131,6 +131,34 @@ class MyPromise {
 
     return _promise
   }
+
+  static all (array) {
+    let result = []
+    let index = 0
+    const { length } = array
+
+    return new MyPromise((resolve, reject) => {
+
+      function addData (key, value) {
+        result[key] = value
+        index++
+        if (index === length) {
+          resolve(result)
+        }
+      }
+
+      for (let i = 0; i < length; i++) {
+        let current = array[i];
+        if (current instanceof MyPromise) {
+          current.then(value => addData(i, value), reason => reject(reason))
+        } else {
+          addData(i, current)
+        }
+      }
+    })
+  }
+
+
 }
 
 function resolvePromise (promise, data, resolve, reject) {
@@ -147,6 +175,8 @@ function resolvePromise (promise, data, resolve, reject) {
   }
 }
 
+// console.log(MyPromise)
+
 
 let promise = new MyPromise((resolve, reject) => {
   // setTimeout(() => {
@@ -155,8 +185,15 @@ let promise = new MyPromise((resolve, reject) => {
     // reject('error')
   // }, 2000)
 })
-promise.then().then().then(v => {
-  console.log(v)
+
+let p1 = new MyPromise((resolve, reject) => {
+  reject('fail')
+})
+// promise.then().then().then(v => {
+//   console.log(v)
+// })
+MyPromise.all([2, 3, 'a', promise, p1]).then(val => {
+  console.log(val)
 })
 
 // let p1 = promise.then((value) => {
