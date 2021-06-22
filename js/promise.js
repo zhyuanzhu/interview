@@ -132,6 +132,23 @@ class MyPromise {
     return _promise
   }
 
+  finally (callback) {
+    return this.then((value) => {
+      return MyPromise.resolve(callback()).then((v) => {
+        if (!callback()) return value
+        return v
+      })    // 为了处理 callback 中是异步调用的 promise
+      // callback()
+      // return value
+    }, err => {
+      // callback(err)
+      // throw err
+      return MyPromise.resolve(callback()).then(() => {
+        throw err
+      }) 
+    })
+  }
+
   static all (array) {
     let result = []
     let index = 0
@@ -159,9 +176,7 @@ class MyPromise {
   }
 
   static resolve (data) {
-    if (data instanceof MyPromise) {
-      return data
-    }
+    if (data instanceof MyPromise) return data
     return new MyPromise(resolve => resolve(data))
   }
 
@@ -195,6 +210,7 @@ function resolvePromise (promise, data, resolve, reject) {
 let promise = new MyPromise((resolve, reject) => {
   // setTimeout(() => {
     // throw new Error(`executor error`)
+    // console.log('promise')
     resolve(1)
     // reject('error')
   // }, 2000)
@@ -207,13 +223,38 @@ let p1 = new MyPromise((resolve, reject) => {
 //   console.log(v)
 // })
 
+function p0 () {
+  return new MyPromise((resolve) => {
+    setTimeout(() => {
+      resolve('p0')
+    }, 2000);
+  })
+}
+
 let p2 = MyPromise.resolve(100)
+// p2.finally(() => {
+//   console.log('finally')
+// }).then((d) => {
+//   console.log(d)
+// }, (e) => {
+//   console.log(e)
+// })
 
 let p3 = MyPromise.reject('reject')
+// p3.then(() => {}, e => console.log(e))
+// console.log(p3)
+// p3.finally(() => {
+//   console.log('finally')
+// }).then((d) => {
+//   console.log(d)
+// }, (e) => {
+//   console.log('p3')
+//   console.log(e)
+// })
 
-MyPromise.all([p3, p2, 2, 3, 'a', promise]).then(val => {
-  console.log(val)
-})
+// MyPromise.all([p3, p2, 2, 3, 'a', promise]).then(val => {
+//   console.log(val)
+// })
 
 // let p1 = promise.then((value) => {
 //   console.log(value)
@@ -230,3 +271,19 @@ MyPromise.all([p3, p2, 2, 3, 'a', promise]).then(val => {
 // }, (err2) => {
 //   console.log(`err2`, err2)
 // })
+
+function px () {
+  return new MyPromise((rs) => {
+    rs(222)
+  })
+}
+
+px().finally(() => {
+  let x = p0()
+  console.log('x', x)
+  // return x
+})
+.then(val => {
+  console.log('finall then')
+  console.log(val)
+})
